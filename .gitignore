@@ -1,28 +1,13 @@
-# Node modules
 node_modules/
-
-# Temporary files
 tmp/
 *.tmp
-
-# OS files
 .DS_Store
 Thumbs.db
-
-# IDE files
 .vscode/
 .idea/
 *.swp
 *.swo
-
-# Build artifacts
 dist/
 build/
-
-# Logs
 *.log
-
-# Test files
-test-page.html
-manual-test.html
-validate-extension.js
+package-lock.json

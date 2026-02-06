@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
   "name": "ColorEx",
-  "version": "1.0.0",
-  "description": "Browser skin color controller based on URL patterns",
-  "permissions": ["tabs", "storage", "theme"],
+  "version": "1.1.0",
+  "description": "Color-code your browser tabs based on URL patterns",
+  "permissions": ["tabs", "storage", "scripting"],
   "host_permissions": ["<all_urls>"],
   "background": {
     "service_worker": "worker.js"

@@ -1,186 +1,60 @@
-# ColorEx - URL-Based Browser Theme Controller
+# ColorEx
 
-A Chrome extension that dynamically changes your browser's skin color based on the currently active URL. Supports both wildcard patterns (`*`, `?`) and regular expressions for flexible URL matching.
+A Chrome extension that shows a colored indicator bar at the top of web pages based on URL patterns. Useful for visually distinguishing environments (production vs staging), grouping sites by category, or just adding color to your browsing.
 
-## Features
+## How it works
 
-- 🎨 **Dynamic Theme Changes**: Automatically updates browser skin colors when you navigate to different sites
-- 🔍 **Flexible Pattern Matching**: Supports both simple wildcard patterns and advanced regular expressions
-- ⚙️ **Easy Configuration**: User-friendly popup interface to manage URL-color mappings
-- 💾 **Persistent Settings**: Your configurations are saved and synced across Chrome instances
-- ✅ **Pattern Validator**: Built-in tool to test your URL patterns before saving
+When you navigate to a URL that matches one of your configured patterns, a thin colored bar appears at the top of the page. When no pattern matches, the bar is removed.
+
+Patterns can use **wildcards** (`*` matches any characters, `?` matches one character) or **regular expressions** (auto-detected when the pattern contains regex syntax like `^`, `$`, `(`, `[`, `+`, or `\`).
 
 ## Installation
 
-### From Source
-
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/rfulwell/colorex.git
-   cd colorex
-   ```
-
-2. Open Chrome and navigate to `chrome://extensions/`
-
-3. Enable "Developer mode" using the toggle in the top right
-
-4. Click "Load unpacked" and select the `colorex` directory
-
-5. The ColorEx icon should now appear in your extensions toolbar
+1. Clone the repo and open `chrome://extensions/`
+2. Enable **Developer mode** (toggle in the top right)
+3. Click **Load unpacked** and select the `colorex` directory
 
 ## Usage
 
-### Opening the Configuration Panel
+Click the ColorEx icon in the toolbar to open the popup. From there you can:
 
-Click the ColorEx icon in your browser toolbar to open the configuration panel.
+- **Add** new URL-to-color mappings
+- **Edit** the label, pattern, and color of existing mappings
+- **Delete** or **disable** mappings with the checkbox/button
+- **Test** patterns using the Expression Validator at the bottom
+- **Save** to persist changes (synced across Chrome instances)
+- **Reset** to restore the built-in defaults
 
-### Adding URL-Color Mappings
+### Pattern examples
 
-1. Click the "+ New Mapping" button
-2. Enter a name for your mapping (e.g., "GitHub")
-3. Enter a URL pattern (see examples below)
-4. Select a color using the color picker
-5. Click "Save Mappings" to apply your changes
+| Pattern | Matches |
+|---|---|
+| `*github.com*` | Any URL containing `github.com` |
+| `*localhost*` | Local development servers |
+| `*.company.com*` | All subdomains of `company.com` |
+| `^https://github\.com/.*` | GitHub over HTTPS only |
+| `(dev\|staging)\.example\.com` | Dev or staging environments |
 
-### URL Pattern Examples
+Mappings are matched in list order (first match wins).
 
-#### Wildcard Patterns
+## Default mappings
 
-- `*github.com*` - Matches any URL containing "github.com"
-- `https://www.google.com/*` - Matches all Google pages
-- `*://mail.google.com/*` - Matches Gmail regardless of protocol
-- `*.reddit.com*` - Matches all Reddit subdomains
-- `https://example.com/page?` - Matches URLs with one character after "page"
+| Label | Pattern | Color |
+|---|---|---|
+| GitHub | `*github.com*` | #1f2328 |
+| Reddit | `*reddit.com*` | #ff4500 |
+| X | `*x.com*` | #000000 |
 
-#### Regular Expression Patterns
+## Running tests
 
-Regular expressions are automatically detected when your pattern contains regex-specific characters:
-
-- `^https://github\.com/.*` - Matches GitHub URLs starting with https
-- `^https?://.*\.wikipedia\.org/.*` - Matches Wikipedia sites with http or https
-- `(facebook|twitter|instagram)\.com` - Matches multiple social media sites
-- `^https://.*\.(jpg|png|gif)$` - Matches image file URLs
-
-### Testing Patterns
-
-Use the "Expression Validator" section to test your patterns:
-
-1. Enter your URL pattern in the first field
-2. Enter a test URL in the second field
-3. Click "Validate" to see if they match
-
-### Managing Mappings
-
-- **Enable/Disable**: Use the checkbox to temporarily disable a mapping
-- **Edit**: Click on any field to modify the mapping
-- **Delete**: Click the "Delete" button to remove a mapping
-- **Reset**: Click "Reset Defaults" to restore the initial example mappings
-
-## How It Works
-
-### Pattern Matching Algorithm
-
-ColorEx uses an intelligent pattern detection system:
-
-1. **Regex Detection**: If your pattern contains characters like `(`, `)`, `[`, `]`, `{`, `}`, `^`, `$`, `|`, `+`, or `\`, it's treated as a regular expression
-
-2. **Wildcard Matching**: Otherwise, it's treated as a wildcard pattern where:
-   - `*` matches any sequence of characters (including none)
-   - `?` matches exactly one character
-
-### Theme Application
-
-When a URL matches a pattern:
-
-1. The extension applies the specified color to the browser frame
-2. Automatically calculates appropriate colors for inactive frames and toolbars
-3. Selects contrasting text colors for readability
-
-When no patterns match, the extension resets to your default browser theme.
-
-## Examples
-
-### Example 1: Development Sites
-
+```bash
+npm test
 ```
-Pattern: *localhost*
-Color: #10b981 (Green)
-Name: Local Development
-```
-
-### Example 2: Work Sites
-
-```
-Pattern: *.company.com*
-Color: #3b82f6 (Blue)
-Name: Company Sites
-```
-
-### Example 3: Documentation
-
-```
-Pattern: ^https://.*\.(github\.io|readthedocs\.io).*
-Color: #8b5cf6 (Purple)
-Name: Documentation
-```
-
-## Default Mappings
-
-ColorEx comes with these default mappings:
-
-- **GitHub** (`*github.com*`): Dark Gray (#1f2328)
-- **Reddit** (`*reddit.com*`): Orange (#ff4500)
-- **Twitter** (`*twitter.com*`): Blue (#1da1f2)
 
 ## Permissions
 
-ColorEx requires the following permissions:
-
-- `tabs`: To detect URL changes and active tab information
-- `storage`: To save your configuration
-- `theme`: To update the browser theme colors
-- `<all_urls>`: To monitor navigation across all websites
-
-## Technical Details
-
-- **Manifest Version**: 3
-- **Service Worker**: Uses modern Chrome extension architecture
-- **Storage**: Syncs configuration across Chrome instances
-- **Performance**: Lightweight with minimal resource usage
-
-## Troubleshooting
-
-### Theme not changing?
-
-1. Check that your mapping is enabled (checkbox is checked)
-2. Verify your URL pattern matches the current URL using the validator
-3. Make sure you clicked "Save Mappings" after making changes
-
-### Pattern not matching?
-
-1. Use the built-in validator to test your pattern
-2. For wildcards, remember `*` matches any characters and `?` matches exactly one
-3. For regex, ensure your syntax is valid (the extension will log errors to the console)
-
-### Colors look wrong?
-
-The extension automatically adjusts colors for different UI elements. If a color doesn't look right, try:
-- Choosing a different shade
-- Using a color with more contrast
-- Checking the color in both light and dark system themes
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit issues or pull requests.
+See [SECURITY.md](SECURITY.md) for a detailed breakdown of what permissions are used and why.
 
 ## License
 
-MIT License - feel free to use and modify as needed.
-
-## Author
-
-Built with ❤️ for better browser customization
-
----
-
-**Note**: This extension modifies your browser's theme. Some websites may override these colors with their own styles.
+MIT
