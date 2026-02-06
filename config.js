@@ -119,7 +119,7 @@ class InterfaceController {
 
   performMatch(url, expression) {
     // Simple wildcard matching for display
-    const hasRegex = /[\^\$\[\]\{\}\(\)\|\\]/.test(expression);
+    const hasRegex = /[\^\$\[\]\{\}\(\)\|\+\\]/.test(expression);
     
     if (hasRegex) {
       try {

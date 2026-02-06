@@ -22,7 +22,7 @@ class SkinColorEngine {
 
   evaluateUrlAgainstExpression(addressBar, expression) {
     // Determine if expression uses regex syntax or wildcards
-    const hasRegexMarkers = /[\^\$\[\]\{\}\(\)\|\\]/.test(expression);
+    const hasRegexMarkers = /[\^\$\[\]\{\}\(\)\|\+\\]/.test(expression);
     
     if (hasRegexMarkers) {
       // Treat as regular expression

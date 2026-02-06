@@ -30,8 +30,8 @@
 7. Navigate to `https://twitter.com`
 8. Verify the browser frame color changes to blue
 
-8. Navigate to `https://google.com`
-9. Verify the browser frame resets to default (no mapping matches)
+9. Navigate to `https://google.com`
+10. Verify the browser frame resets to default (no mapping matches)
 
 #### Test Wildcard Patterns
 
