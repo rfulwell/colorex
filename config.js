@@ -4,6 +4,7 @@
 class ConfigController {
   constructor() {
     this.mappings = [];
+    this._saveTimer = null;
     this.initialize();
   }
 
@@ -47,19 +48,24 @@ class ConfigController {
 
     toggle.addEventListener('change', () => {
       this.mappings[index].active = toggle.checked;
+      this.scheduleSave();
     });
     labelInput.addEventListener('input', () => {
       this.mappings[index].label = labelInput.value;
+      this.scheduleSave();
     });
     expressionInput.addEventListener('input', () => {
       this.mappings[index].urlExpression = expressionInput.value;
+      this.scheduleSave();
     });
     colorInput.addEventListener('change', () => {
       this.mappings[index].hexValue = colorInput.value;
+      this.scheduleSave();
     });
     deleteBtn.addEventListener('click', () => {
       this.mappings.splice(index, 1);
       this.render();
+      this.scheduleSave();
     });
 
     return clone;
@@ -80,6 +86,28 @@ class ConfigController {
     }
   }
 
+  // --- Auto-save ---
+
+  scheduleSave() {
+    clearTimeout(this._saveTimer);
+    this.setStatus('pending');
+    this._saveTimer = setTimeout(() => this.save(), 600);
+  }
+
+  setStatus(state) {
+    const el = document.getElementById('saveStatus');
+    if (state === 'saved') {
+      el.textContent = 'Saved';
+      el.className = 'save-status visible saved';
+    } else if (state === 'error') {
+      el.className = 'save-status visible error';
+      // textContent set by caller
+    } else {
+      el.textContent = 'Unsaved changes';
+      el.className = 'save-status visible pending';
+    }
+  }
+
   // --- Actions ---
 
   addMapping() {
@@ -93,22 +121,23 @@ class ConfigController {
   }
 
   async save() {
-    // Validate all mappings before saving
+    const statusEl = document.getElementById('saveStatus');
+
+    // Validate — skip empty patterns silently (user may still be typing)
     for (const m of this.mappings) {
-      if (!m.urlExpression) {
-        this.notify('Please fill in all URL patterns before saving.', true);
+      if (m.urlExpression && m.urlExpression.length > ColorEx.MAX_PATTERN_LENGTH) {
+        statusEl.textContent = `Pattern "${m.label}" too long`;
+        this.setStatus('error');
         return;
       }
-      if (m.urlExpression.length > ColorEx.MAX_PATTERN_LENGTH) {
-        this.notify(`Pattern "${m.label}" exceeds max length of ${ColorEx.MAX_PATTERN_LENGTH}.`, true);
+      if (m.urlExpression && ColorEx.isRegexPattern(m.urlExpression) && ColorEx.isReDoSRisk(m.urlExpression)) {
+        statusEl.textContent = `Pattern "${m.label}" has unsafe regex`;
+        this.setStatus('error');
         return;
       }
-      if (ColorEx.isRegexPattern(m.urlExpression) && ColorEx.isReDoSRisk(m.urlExpression)) {
-        this.notify(`Pattern "${m.label}" contains potentially unsafe regex. Simplify it.`, true);
-        return;
-      }
-      if (!ColorEx.normalizeHex(m.hexValue)) {
-        this.notify(`Invalid color for "${m.label}".`, true);
+      if (m.hexValue && !ColorEx.normalizeHex(m.hexValue)) {
+        statusEl.textContent = `Invalid color for "${m.label}"`;
+        this.setStatus('error');
         return;
       }
     }
@@ -116,23 +145,19 @@ class ConfigController {
     try {
       await chrome.storage.sync.set({ urlColorMappings: this.mappings });
       chrome.runtime.sendMessage({ type: 'refreshMappings' });
-      this.notify('Mappings saved!');
+      this.setStatus('saved');
     } catch (err) {
-      this.notify('Save failed: ' + (err.message || 'storage quota exceeded'), true);
+      const statusEl2 = document.getElementById('saveStatus');
+      statusEl2.textContent = err.message || 'Save failed';
+      this.setStatus('error');
     }
   }
 
   async resetDefaults() {
     if (!confirm('Reset all mappings to defaults? This cannot be undone.')) return;
     this.mappings = structuredClone(ColorEx.DEFAULT_MAPPINGS);
-    try {
-      await chrome.storage.sync.set({ urlColorMappings: this.mappings });
-      chrome.runtime.sendMessage({ type: 'refreshMappings' });
-      this.render();
-      this.notify('Defaults restored!');
-    } catch (err) {
-      this.notify('Reset failed: ' + (err.message || 'unknown error'), true);
-    }
+    this.render();
+    await this.save();
   }
 
   validate() {
@@ -147,7 +172,7 @@ class ConfigController {
     }
 
     if (ColorEx.isRegexPattern(expression) && ColorEx.isReDoSRisk(expression)) {
-      resultDiv.textContent = 'Pattern rejected: potentially unsafe regex (nested quantifiers or too long).';
+      resultDiv.textContent = 'Pattern rejected: potentially unsafe regex.';
       resultDiv.className = 'validation-output visible negative';
       return;
     }
@@ -163,25 +188,16 @@ class ConfigController {
 
   bindEvents() {
     document.getElementById('btnAddMapping').addEventListener('click', () => this.addMapping());
-    document.getElementById('btnSave').addEventListener('click', () => this.save());
     document.getElementById('btnReset').addEventListener('click', () => this.resetDefaults());
     document.getElementById('btnValidate').addEventListener('click', () => this.validate());
-  }
 
-  // --- Notification ---
-
-  notify(message, isError = false) {
-    const el = document.createElement('div');
-    el.textContent = message;
-    el.style.cssText = [
-      'position:fixed', 'top:20px', 'right:20px',
-      `background:${isError ? '#ef4444' : '#10b981'}`,
-      'color:white', 'padding:12px 20px', 'border-radius:6px',
-      'font-size:13px', 'box-shadow:0 4px 6px rgba(0,0,0,0.1)',
-      'z-index:1000'
-    ].join(';');
-    document.body.appendChild(el);
-    setTimeout(() => el.remove(), 2500);
+    // Save immediately when popup is about to close
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') {
+        clearTimeout(this._saveTimer);
+        this.save();
+      }
+    });
   }
 }
 

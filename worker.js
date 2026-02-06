@@ -25,27 +25,26 @@ async function applyIndicator(tabId, hexColor) {
   try {
     await chrome.scripting.executeScript({
       target: { tabId },
-      func: (id, height, color) => {
+      func: (id, color) => {
         if (color) {
           let el = document.getElementById(id);
           if (!el) {
             el = document.createElement('div');
             el.id = id;
-            el.style.cssText = [
-              'position:fixed', 'top:0', 'left:0', 'right:0',
-              `height:${height}px`,
-              'z-index:2147483647', 'pointer-events:none',
-              'transition:background-color 0.2s'
-            ].join(';');
             document.documentElement.appendChild(el);
           }
-          el.style.backgroundColor = color;
+          el.style.cssText = [
+            'position:fixed', 'top:0', 'left:0', 'right:0', 'bottom:0',
+            'z-index:2147483647', 'pointer-events:none',
+            'transition:box-shadow 0.2s',
+            `box-shadow:inset 0 0 0 4px ${color}, inset 0 4px 0 0 ${color}`
+          ].join(';');
         } else {
           const el = document.getElementById(id);
           if (el) el.remove();
         }
       },
-      args: [INDICATOR_ID, INDICATOR_HEIGHT, hexColor]
+      args: [INDICATOR_ID, hexColor]
     });
   } catch {
     // Restricted pages (chrome://, chrome-extension://, etc.) will throw — ignore.

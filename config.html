@@ -218,19 +218,38 @@
       padding: 16px 20px;
       border-top: 2px solid #e5e7eb;
       display: flex;
+      align-items: center;
       gap: 12px;
     }
-    
-    .btn-save {
-      flex: 1;
-      background: #10b981;
-      color: white;
-    }
-    
+
     .btn-reset {
-      flex: 1;
       background: #ef4444;
       color: white;
+    }
+
+    .save-status {
+      flex: 1;
+      font-size: 12px;
+      font-weight: 600;
+      text-align: right;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .save-status.visible {
+      opacity: 1;
+    }
+
+    .save-status.saved {
+      color: #10b981;
+    }
+
+    .save-status.pending {
+      color: #f59e0b;
+    }
+
+    .save-status.error {
+      color: #ef4444;
     }
   </style>
 </head>
@@ -270,8 +289,8 @@
   </div>
 
   <div class="bottom-actions">
-    <button id="btnSave" class="action-btn btn-save">Save Mappings</button>
     <button id="btnReset" class="action-btn btn-reset">Reset Defaults</button>
+    <span id="saveStatus" class="save-status"></span>
   </div>
 
   <template id="mappingTemplate">
