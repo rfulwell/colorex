@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>ColorEx Configuration</title>
+  <style>
+    body {
+      width: 500px;
+      min-height: 550px;
+      margin: 0;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #f0f2f5;
+    }
+    
+    .topbar {
+      background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%);
+      color: white;
+      padding: 24px;
+      text-align: center;
+    }
+    
+    .topbar h1 {
+      margin: 0 0 6px 0;
+      font-size: 22px;
+      font-weight: 700;
+    }
+    
+    .topbar p {
+      margin: 0;
+      font-size: 13px;
+      opacity: 0.85;
+    }
+    
+    .info-panel {
+      background: white;
+      padding: 16px 20px;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    
+    .info-row {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 12px;
+      margin-bottom: 10px;
+      font-size: 13px;
+    }
+    
+    .info-row:last-child {
+      margin-bottom: 0;
+    }
+    
+    .info-key {
+      font-weight: 600;
+      color: #6b7280;
+    }
+    
+    .info-val {
+      color: #3b82f6;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    
+    .mappings-container {
+      padding: 20px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    
+    .section-title h2 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #111827;
+      margin: 0;
+    }
+    
+    .mapping-card {
+      background: white;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+    
+    .mapping-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    
+    .toggle-switch {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+    
+    .mapping-label {
+      flex: 1;
+      padding: 7px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 5px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    
+    .mapping-body {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    
+    .mapping-expression {
+      flex: 1;
+      padding: 7px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 5px;
+      font-size: 12px;
+      font-family: 'Courier New', monospace;
+    }
+    
+    .color-selector {
+      width: 55px;
+      height: 34px;
+      border: 1px solid #d1d5db;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    
+    .action-btn {
+      padding: 8px 14px;
+      border: none;
+      border-radius: 5px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    
+    .action-btn:hover {
+      opacity: 0.85;
+    }
+    
+    .btn-add {
+      background: #6366f1;
+      color: white;
+    }
+    
+    .btn-delete {
+      background: #fef2f2;
+      color: #dc2626;
+    }
+    
+    .validator-section {
+      background: #fffbeb;
+      padding: 16px 20px;
+      border-top: 2px solid #fbbf24;
+    }
+    
+    .validator-section h3 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #111827;
+      margin: 0 0 12px 0;
+    }
+    
+    .validator-inputs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    
+    .validator-inputs input {
+      flex: 1;
+      padding: 7px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 5px;
+      font-size: 12px;
+    }
+    
+    .btn-validate {
+      background: #78716c;
+      color: white;
+    }
+    
+    .validation-output {
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 12px;
+      display: none;
+    }
+    
+    .validation-output.visible {
+      display: block;
+    }
+    
+    .validation-output.positive {
+      background: #d1fae5;
+      color: #065f46;
+      border: 1px solid #10b981;
+    }
+    
+    .validation-output.negative {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #ef4444;
+    }
+    
+    .bottom-actions {
+      background: white;
+      padding: 16px 20px;
+      border-top: 2px solid #e5e7eb;
+      display: flex;
+      gap: 12px;
+    }
+    
+    .btn-save {
+      flex: 1;
+      background: #10b981;
+      color: white;
+    }
+    
+    .btn-reset {
+      flex: 1;
+      background: #ef4444;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <h1>🎨 ColorEx</h1>
+    <p>Dynamic browser skin based on URLs</p>
+  </div>
+
+  <div class="info-panel">
+    <div class="info-row">
+      <span class="info-key">Active URL:</span>
+      <span id="activeUrl" class="info-val">Loading...</span>
+    </div>
+    <div class="info-row">
+      <span class="info-key">Applied Mapping:</span>
+      <span id="appliedMapping" class="info-val">None</span>
+    </div>
+  </div>
+
+  <div class="mappings-container">
+    <div class="section-title">
+      <h2>URL-Color Mappings</h2>
+      <button id="btnAddMapping" class="action-btn btn-add">+ New Mapping</button>
+    </div>
+    <div id="mappingsList"></div>
+  </div>
+
+  <div class="validator-section">
+    <h3>Expression Validator</h3>
+    <div class="validator-inputs">
+      <input type="text" id="expressionInput" placeholder="Pattern (e.g., *site.com* or ^https://.*)" />
+      <input type="text" id="urlInput" placeholder="Test URL" />
+      <button id="btnValidate" class="action-btn btn-validate">Validate</button>
+    </div>
+    <div id="validationResult" class="validation-output"></div>
+  </div>
+
+  <div class="bottom-actions">
+    <button id="btnSave" class="action-btn btn-save">Save Mappings</button>
+    <button id="btnReset" class="action-btn btn-reset">Reset Defaults</button>
+  </div>
+
+  <template id="mappingTemplate">
+    <div class="mapping-card">
+      <div class="mapping-header">
+        <input type="checkbox" class="toggle-switch" checked />
+        <input type="text" class="mapping-label" placeholder="Mapping name" />
+      </div>
+      <div class="mapping-body">
+        <input type="text" class="mapping-expression" placeholder="URL expression (wildcards or regex)" />
+        <input type="color" class="color-selector" />
+        <button class="action-btn btn-delete">Delete</button>
+      </div>
+    </div>
+  </template>
+
+  <script src="config.js"></script>
+</body>
+</html>

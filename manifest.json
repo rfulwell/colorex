@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "ColorEx",
+  "version": "1.0.0",
+  "description": "Browser skin color controller based on URL patterns",
+  "permissions": ["tabs", "storage", "theme"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "worker.js"
+  },
+  "action": {
+    "default_popup": "config.html",
+    "default_title": "ColorEx Settings"
+  },
+  "icons": {
+    "16": "assets/icon16.png",
+    "48": "assets/icon48.png",
+    "128": "assets/icon128.png"
+  }
+}
