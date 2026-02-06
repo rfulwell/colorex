@@ -3,13 +3,14 @@ class SkinColorEngine {
   constructor() {
     this.mappings = [];
     this.fallbackPalette = null;
-    this.loadSavedMappings();
+    this.isReady = false;
   }
 
   async loadSavedMappings() {
     const data = await chrome.storage.sync.get(['urlColorMappings', 'fallback']);
     this.mappings = data.urlColorMappings || this.buildInitialMappings();
     this.fallbackPalette = data.fallback;
+    this.isReady = true;
   }
 
   buildInitialMappings() {
@@ -166,6 +167,17 @@ chrome.windows.onFocusChanged.addListener(async (windowId) => {
 function processUrlUpdate(addressBar) {
   if (!addressBar) return;
   
+  // Wait for engine to be ready
+  if (!colorEngine.isReady) {
+    colorEngine.loadSavedMappings().then(() => {
+      processUrlUpdateInternal(addressBar);
+    });
+  } else {
+    processUrlUpdateInternal(addressBar);
+  }
+}
+
+function processUrlUpdateInternal(addressBar) {
   const match = colorEngine.locateMatchingMapping(addressBar);
   
   if (match) {
@@ -194,10 +206,20 @@ chrome.runtime.onMessage.addListener((msg, sender, respond) => {
   }
 });
 
-chrome.runtime.onStartup.addListener(() => {
-  colorEngine.loadSavedMappings();
+chrome.runtime.onStartup.addListener(async () => {
+  await colorEngine.loadSavedMappings();
+  // Process current active tab
+  const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (tabs[0] && tabs[0].url) {
+    processUrlUpdate(tabs[0].url);
+  }
 });
 
-chrome.runtime.onInstalled.addListener(() => {
-  colorEngine.loadSavedMappings();
+chrome.runtime.onInstalled.addListener(async () => {
+  await colorEngine.loadSavedMappings();
+  // Process current active tab
+  const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (tabs[0] && tabs[0].url) {
+    processUrlUpdate(tabs[0].url);
+  }
 });
