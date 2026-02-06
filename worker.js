@@ -1,7 +1,6 @@
 importScripts('matching.js');
 
 const INDICATOR_ID = 'colorex-indicator';
-const INDICATOR_HEIGHT = 4;
 const DEBOUNCE_MS = 150;
 
 let mappings = [];
