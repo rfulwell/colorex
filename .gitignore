@@ -24,3 +24,5 @@ build/
 
 # Test files
 test-page.html
+manual-test.html
+validate-extension.js
