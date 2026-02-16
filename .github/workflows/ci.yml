@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+    
+    - name: Run tests
+      run: npm test
+    
+    - name: Verify extension files
+      run: |
+        echo "Checking for required extension files..."
+        test -f manifest.json || exit 1
+        test -f config.html || exit 1
+        test -f config.js || exit 1
+        test -f worker.js || exit 1
+        test -f matching.js || exit 1
+        echo "All required files present"
+    
+    - name: Validate manifest.json
+      run: |
+        echo "Validating manifest.json..."
+        node -e "const manifest = require('./manifest.json'); if (manifest.manifest_version !== 3) throw new Error('Invalid manifest version');"
+        echo "Manifest is valid"
